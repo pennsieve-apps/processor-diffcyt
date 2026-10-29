@@ -1,0 +1,217 @@
+cff-version: "1.2.0"
+message: If you use this app, please cite it and the works it builds on, listed under references.
+type: software
+title: diffcyt Differential Abundance & State
+abstract: Tests which FlowSOM metaclusters change in frequency (differential abundance) and which cluster-marker
+  pairs change in expression (differential state) between conditions with diffcyt, following the CyTOF
+  workflow of Nowicka et al. Writes result tables, volcano and proportion plots, heatmaps and JSON summaries.
+authors:
+- name: Pennsieve (University of Pennsylvania)
+repository-code: https://github.com/pennsieve-apps/processor-diffcyt
+license: Apache-2.0
+keywords:
+- cytometry
+- flow-cytometry
+- immunology
+- differential-abundance
+- differential-state
+- statistics
+- diffcyt
+references:
+- type: article
+  title: 'diffcyt: Differential discovery in high-dimensional cytometry via high-resolution clustering'
+  authors:
+  - family-names: Weber
+    given-names: Lukas M.
+  - family-names: Nowicka
+    given-names: Malgorzata
+  - family-names: Soneson
+    given-names: Charlotte
+  - family-names: Robinson
+    given-names: Mark D.
+  year: 2019
+  journal: Communications Biology
+  volume: 2
+  issue: '1'
+  start: '183'
+  doi: 10.1038/s42003-019-0415-5
+- type: article
+  title: 'CyTOF workflow: differential discovery in high-throughput high-dimensional cytometry datasets'
+  authors:
+  - family-names: Nowicka
+    given-names: Malgorzata
+  - family-names: Krieg
+    given-names: Carsten
+  - family-names: Crowell
+    given-names: Helena L.
+  - family-names: Weber
+    given-names: Lukas M.
+  - family-names: Hartmann
+    given-names: Felix J.
+  - family-names: Guglietta
+    given-names: Silvia
+  - family-names: Becher
+    given-names: Burkhard
+  - family-names: Levesque
+    given-names: Mitchell P.
+  - family-names: Robinson
+    given-names: Mark D.
+  year: 2017
+  journal: F1000Research
+  volume: 6
+  start: '748'
+  doi: 10.12688/f1000research.11622.3
+- type: article
+  title: 'FlowSOM: Using self-organizing maps for visualization and interpretation of cytometry data'
+  authors:
+  - family-names: Van Gassen
+    given-names: Sofie
+  - family-names: Callebaut
+    given-names: Britt
+  - family-names: Van Helden
+    given-names: Mary J.
+  - family-names: Lambrecht
+    given-names: Bart N.
+  - family-names: Demeester
+    given-names: Piet
+  - family-names: Dhaene
+    given-names: Tom
+  - family-names: Saeys
+    given-names: Yvan
+  year: 2015
+  journal: Cytometry Part A
+  volume: 87
+  issue: '7'
+  start: '636'
+  end: '645'
+  doi: 10.1002/cyto.a.22625
+- type: article
+  title: 'edgeR: a Bioconductor package for differential expression analysis of digital gene expression
+    data'
+  authors:
+  - family-names: Robinson
+    given-names: Mark D.
+  - family-names: McCarthy
+    given-names: Davis J.
+  - family-names: Smyth
+    given-names: Gordon K.
+  year: 2010
+  journal: Bioinformatics
+  volume: 26
+  issue: '1'
+  start: '139'
+  end: '140'
+  doi: 10.1093/bioinformatics/btp616
+- type: article
+  title: Differential expression analysis of multifactor RNA-Seq experiments with respect to biological
+    variation
+  authors:
+  - family-names: McCarthy
+    given-names: Davis J.
+  - family-names: Chen
+    given-names: Yunshun
+  - family-names: Smyth
+    given-names: Gordon K.
+  year: 2012
+  journal: Nucleic Acids Research
+  volume: 40
+  issue: '10'
+  start: '4288'
+  end: '4297'
+  doi: 10.1093/nar/gks042
+- type: article
+  title: limma powers differential expression analyses for RNA-sequencing and microarray studies
+  authors:
+  - family-names: Ritchie
+    given-names: Matthew E.
+  - family-names: Phipson
+    given-names: Belinda
+  - family-names: Wu
+    given-names: Di
+  - family-names: Hu
+    given-names: Yifang
+  - family-names: Law
+    given-names: Charity W.
+  - family-names: Shi
+    given-names: Wei
+  - family-names: Smyth
+    given-names: Gordon K.
+  year: 2015
+  journal: Nucleic Acids Research
+  volume: 43
+  issue: '7'
+  start: e47
+  doi: 10.1093/nar/gkv007
+- type: article
+  title: 'voom: precision weights unlock linear model analysis tools for RNA-seq read counts'
+  authors:
+  - family-names: Law
+    given-names: Charity W
+  - family-names: Chen
+    given-names: Yunshun
+  - family-names: Shi
+    given-names: Wei
+  - family-names: Smyth
+    given-names: Gordon K
+  year: 2014
+  journal: Genome Biology
+  volume: 15
+  issue: '2'
+  start: R29
+  doi: 10.1186/gb-2014-15-2-r29
+- type: article
+  title: Fitting Linear Mixed-Effects Models Using lme4
+  authors:
+  - family-names: Bates
+    given-names: Douglas
+  - family-names: Mächler
+    given-names: Martin
+  - family-names: Bolker
+    given-names: Ben
+  - family-names: Walker
+    given-names: Steve
+  year: 2015
+  journal: Journal of Statistical Software
+  volume: 67
+  issue: '1'
+  doi: 10.18637/jss.v067.i01
+- type: article
+  title: Simultaneous Inference in General Parametric Models
+  authors:
+  - family-names: Hothorn
+    given-names: Torsten
+  - family-names: Bretz
+    given-names: Frank
+  - family-names: Westfall
+    given-names: Peter
+  year: 2008
+  journal: Biometrical Journal
+  volume: 50
+  issue: '3'
+  start: '346'
+  end: '363'
+  doi: 10.1002/bimj.200810425
+- type: software
+  title: diffcyt
+  authors:
+  - family-names: Weber
+    given-names: Lukas M.
+  year: 2018
+  doi: 10.18129/B9.bioc.diffcyt
+  url: https://bioconductor.org/packages/diffcyt
+- type: data
+  title: 'CytoBatchFlagR: Spectral flow cytometry dataset'
+  authors:
+  - family-names: Koenig
+    given-names: Zachary
+  - family-names: Andorf
+    given-names: Sandra
+  - family-names: Tilburgs
+    given-names: Tamara
+  - family-names: Eswar
+    given-names: Shruti
+  year: 2025
+  publisher:
+    name: Zenodo
+  doi: 10.5281/zenodo.15388817
+  license: CC-BY-4.0
