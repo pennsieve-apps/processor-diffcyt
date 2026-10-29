@@ -22,8 +22,8 @@ application:
     - diffcyt
 runtime:
   # Light: tables only (clusters x samples, never per-cell data). Measured on the demo
-  # study: runs in a 768 MB container (cgroup peak, page cache included, ~0.8 GB);
-  # 2 GB leaves room for large studies (hundreds of samples, many clusters).
+  # study (24 samples, 20 metaclusters): 7-10 s, cgroup peak 1.0-1.1 GB, mostly page
+  # cache from loading R packages (the fixture also completes within a 768 MB limit).
   cpu: 1024
   memory: 2048
   # standard (ECS) by default; a workflow can run this light step as a Lambda function

@@ -147,13 +147,41 @@ Mac), cgroup `memory.peak`, which includes page cache:
 
 | Data | DA / DS | wall time | peak memory |
 |---|---|---|---|
-| synthetic fixture: 24 samples, 12 metaclusters, 9 state markers | edgeR / limma | 7.3 s (5 s of it loading R packages) | 0.94 GB at a 4 GB limit; runs within a 768 MB limit (anonymous memory a few hundred MB) |
-| synthetic fixture | GLMM / limma | 7.5 s | (as above) |
+| demo study (flowsom output): 24 samples, 20 metaclusters, 10 state markers, 10.2 M cells upstream | edgeR / limma | 7.7 s (R start-up and package loading ~5 s) | 1.12 GB |
+| demo study | voom / limma | 7.0 s (log) | 1.03 GB |
+| demo study | GLMM / LMM | 10.3 s (log) | 1.07 GB |
+| synthetic fixture: 24 samples, 12 metaclusters, 9 state markers | edgeR / limma | 7.3 s | 0.94 GB; also completes within a 768 MB limit |
+
+The peaks are cgroup `memory.peak` and are mostly page cache from reading ~150 R packages;
+anonymous memory at the end of a run was a few MB, and the fixture run completes under a 768 MB
+limit. 1 vCPU / 2 GB is therefore generous; it also suits Lambda (2 GB gets a little over one
+vCPU there).
 
 The model fits are on clusters x samples tables, so memory and time barely grow with the
 number of cells; they grow with samples x clusters x markers (LMM and GLMM fit one model per
 cluster, or per cluster and marker). Image: 591 MB compressed, 2.3 GB unpacked (R + ~150
 packages, mostly diffcyt's imports).
+
+## Results on the demo study
+
+Run on flowsom's output for the CytoBatchFlagR demo (24 samples: 6 batches x tcu1, tcu2
+unstimulated, tcs3, tcs4 stimulated 7 days with anti-CD3/CD28 + IL-2), `REFERENCE_LEVEL=unstimulated`,
+batch as a fixed effect, edgeR / limma, FDR 0.05:
+
+- **DA: 13 of 20 metaclusters** change (8 up, 5 down). Up in stimulated: NK CD56dim CD16+
+  (mc 15, 1.8 % -> 19 % of cells, logFC 3.5), the CD25+FOXP3+ CD4 T cluster (mc 1, Treg or
+  activated, 1.2 % -> 5.1 %, logFC 2.3), CD45RA- CD4 and CD8 T clusters (mc 3, 5, 8, 2), CD8 T
+  CD45RA+ CD56+ (mc 11), NK CD56bright (mc 13). Down: the two DN T (gd-like) clusters (mc 6,
+  10), NK CD56dim CD16int (mc 14), CD16+ HLA-DR+ monocyte-like (mc 20) and B cells (mc 19).
+  voom calls 16 and GLMM 14, the same strongest hits.
+- **DS: 142 of 200 cluster-marker pairs** change (limma; LMM: 146). The strongest: CD25 in the
+  CD25+FOXP3+ CD4 T cluster (+1.6 arcsinh units), HLA-DR in NK cells, TIGIT in DN and CD8 T
+  cells, GZMB up in nearly every T and NK cluster (18 of 19 GZMB hits up), HLA-DR (14/15 up),
+  CD69 (13/15), CD25 (12/15) and TIGIT (12/12) up; PFN mostly down.
+- Batch 06's unstimulated samples stand out in `proportions.png` (e.g. ~14 % DN T and ~12 %
+  CD16+ HLA-DR+ cells where the other batches have 1-3 % and ~0 %); the mc 20 "down" call rests
+  on those two samples alone, so read it as a batch artefact rather than biology. That is the
+  dataset's purpose (CytoBatchFlagR); the harmonisation workflow addresses it.
 
 ## Limitations
 

@@ -44,14 +44,29 @@ plot_volcano <- function(da, fdr, path) {
     d <- da[da$comparison == cm & da$tested & !is.na(da$p_val), ]
     y <- -log10(pmax(d$p_val, 1e-300))
     lim <- max(1, abs(d$logFC), na.rm = TRUE) * 1.15
-    plot(NA, xlim = c(-lim, lim), ylim = c(0, max(1, y) * 1.12), xlab = "log2 fold change",
+    plot(NA, xlim = c(-lim, lim) * 1.45, ylim = c(0, max(1, y) * 1.12), xlab = "log2 fold change",
          ylab = expression(-log[10]~p), main = cm, font.main = 1, cex.main = 1, bty = "n")
     abline(v = 0, col = PAL$grid)
     col <- ifelse(!d$significant, PAL$ns, ifelse(d$logFC > 0, PAL$up, PAL$down))
     points(d$logFC, y, pch = 21, bg = col, col = PAL$surface, cex = 1.6, lwd = 1.2)
-    s <- d$significant
-    if (any(s)) text(d$logFC[s], y[s], d$label[s], pos = ifelse(d$logFC[s] > 0, 4, 2), cex = 0.75,
-                     col = PAL$ink, xpd = NA)
+    # Label the 8 strongest hits only (by p), as "label (id)", so labels stay legible.
+    s <- which(d$significant)
+    s <- s[order(d$p_val[s])][seq_len(min(8L, length(s)))]
+    if (length(s)) {
+      lab <- sprintf("%s (%s)", ifelse(nchar(d$label[s]) > 24, paste0(substr(d$label[s], 1, 23), "."), d$label[s]),
+                     d$metacluster[s])
+      # Labels on the same side are pushed apart vertically (no random repel).
+      ly <- y[s]
+      gap <- 0.05 * diff(par("usr")[3:4])
+      for (side in c(TRUE, FALSE)) {
+        idx <- which((d$logFC[s] > 0) == side)
+        idx <- idx[order(-ly[idx])]
+        for (k in seq_along(idx)[-1]) ly[idx[k]] <- min(ly[idx[k]], ly[idx[k - 1]] - gap)
+      }
+      moved <- abs(ly - y[s]) > 1e-9
+      segments(d$logFC[s][moved], y[s][moved], d$logFC[s][moved], ly[moved], col = PAL$ns, lwd = 0.8)
+      text(d$logFC[s], ly, lab, pos = ifelse(d$logFC[s] > 0, 4, 2), cex = 0.68, col = PAL$ink, xpd = NA)
+    }
     legend("topleft", legend = c(sprintf("up (FDR < %g)", fdr), "down", "not significant"),
            pt.bg = c(PAL$up, PAL$down, PAL$ns), pch = 21, col = PAL$surface, bty = "n", cex = 0.75,
            text.col = PAL$ink2)
@@ -66,7 +81,11 @@ plot_proportions <- function(study, da, frac, fdr, path) {
   ids <- names(sort(best[study$clusters]))
   ncol <- min(4L, length(ids))
   nrow <- ceiling(length(ids) / ncol)
-  pch_block <- if ("block" %in% colnames(info)) (as.integer(info$block) - 1L) %% 5L + 21L else rep(21L, nrow(info))
+  # One shape per block: the five filled shapes first, then open ones (drawn in the
+  # group colour); shapes repeat only beyond ten blocks.
+  SHAPES <- c(21L, 22L, 23L, 24L, 25L, 1L, 0L, 5L, 2L, 6L)
+  has_block <- "block" %in% colnames(info)
+  pch_block <- if (has_block) SHAPES[(as.integer(info$block) - 1L) %% length(SHAPES) + 1L] else rep(21L, nrow(info))
   open_png(path, 3.1 * ncol, 2.9 * nrow + 0.5)
   layout(rbind(matrix(seq_len(nrow * ncol), nrow, byrow = TRUE), nrow * ncol + 1L), heights = c(rep(2.9, nrow), 0.5))
   par(mar = c(2.2, 4.4, 3.2, 0.6), mgp = c(3, 0.6, 0))
@@ -87,16 +106,22 @@ plot_proportions <- function(study, da, frac, fdr, path) {
       q <- quantile(x, c(0.25, 0.5, 0.75), na.rm = TRUE)
       rect(k - 0.32, q[1], k + 0.32, q[3], border = PAL$ink2, col = NA, lwd = 1)
       segments(k - 0.32, q[2], k + 0.32, q[2], col = PAL$ink, lwd = 2)
-      points(k + spread(length(x)), x, pch = pch_block[sel], bg = cols[k], col = PAL$surface, cex = 1.3, lwd = 1)
+      pc <- pch_block[sel]
+      points(k + spread(length(x)), x, pch = pc, bg = cols[k], col = ifelse(pc >= 21L, PAL$surface, cols[k]),
+             cex = 1.3, lwd = ifelse(pc >= 21L, 1, 1.6))
     }
   }
   for (i in seq_len(nrow * ncol - length(ids))) plot.new()
   par(mar = c(0, 0, 0, 0))
   plot.new()
-  leg <- names(cols)
-  legend("center", legend = leg, pt.bg = cols, pch = 21, col = PAL$surface, horiz = TRUE, bty = "n",
-         cex = 0.9, text.col = PAL$ink2, pt.cex = 1.5,
-         title = if ("block" %in% colnames(info)) "condition (point shape = block)" else "condition")
+  legend(if (has_block) "left" else "center", legend = names(cols), pt.bg = cols, pch = 21, col = PAL$surface,
+         horiz = TRUE, bty = "n", cex = 0.9, text.col = PAL$ink2, pt.cex = 1.5, title = "condition", inset = 0.05)
+  if (has_block) {
+    bl <- levels(info$block)
+    bp <- SHAPES[(seq_along(bl) - 1L) %% length(SHAPES) + 1L]
+    legend("right", legend = bl, pch = bp, pt.bg = PAL$ns, col = ifelse(bp >= 21L, PAL$surface, PAL$ink2),
+           horiz = TRUE, bty = "n", cex = 0.8, text.col = PAL$ink2, pt.cex = 1.3, title = "block", inset = 0.05)
+  }
   dev.off()
 }
 
@@ -119,11 +144,11 @@ plot_ds_heatmap <- function(study, ds, d_medians, fdr, path, max_rows = 60L) {
   if (nrow(sig) == 1) z <- matrix(z, nrow = 1)
   z <- pmax(pmin(z, 2.5), -2.5)
   rlab <- sprintf("%s (%s) %s", sig$label, sig$metacluster, sig$marker)
-  h <- max(3.6, 1.9 + 0.17 * nrow(z))
-  w <- 3.6 + 0.24 * ncol(z)
+  h <- max(3.6, 2.2 + 0.17 * nrow(z))
+  w <- 5.0 + 0.24 * ncol(z)
   open_png(path, w, h)
-  layout(matrix(c(1, 2), 1), widths = c(w - 1.0, 1.0))
-  par(mar = c(5.5, max(nchar(rlab)) * 0.42 + 1, 2.6, 0.5))
+  layout(matrix(c(1, 2), 1), widths = c(w - 1.6, 1.6))
+  par(mar = c(5.5, max(nchar(rlab)) * 0.42 + 1, 3.6, 0.5))
   image(seq_len(ncol(z)), seq_len(nrow(z)), t(z[nrow(z):1, , drop = FALSE]), col = diverging(), zlim = c(-2.5, 2.5),
         axes = FALSE, xlab = "", ylab = "", useRaster = FALSE)
   axis(2, at = seq_len(nrow(z)), labels = rev(rlab), lwd = 0, cex.axis = 0.7)
@@ -134,8 +159,8 @@ plot_ds_heatmap <- function(study, ds, d_medians, fdr, path, max_rows = 60L) {
        col = cols[as.character(info$condition)], border = PAL$surface, xpd = NA)
   title(main = sprintf("Significant cluster-marker pairs (FDR < %g)%s", fdr,
                        if (n_sig > nrow(sig)) sprintf(", top %d of %d", nrow(sig), n_sig) else ""),
-        cex.main = 0.9, font.main = 1, line = 1.4)
-  par(mar = c(5.5, 0.2, 2.6, 2.6))
+        cex.main = 0.9, font.main = 1, line = 2.4)
+  par(mar = c(5.5, 0.2, 3.6, 0.5))
   plot.new()
   legend("top", legend = names(cols), fill = cols, border = NA, bty = "n", cex = 0.7, text.col = PAL$ink2)
   zs <- seq(-2.5, 2.5, length.out = 101)
