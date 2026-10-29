@@ -1,0 +1,13 @@
+services:
+  processor:
+    image: processor-diffcyt:dev
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - dev.env
+    mem_limit: 4g
+    volumes:
+      - ${INPUT_HOST:-./data/fixture/linked}:/data/input:ro
+      - ./data/output:/data/output

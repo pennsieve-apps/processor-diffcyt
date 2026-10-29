@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=https://schemas.pennsieve.io/app-manifest/v1.json
+schemaVersion: "1.0"
+application:
+  name: diffcyt Differential Abundance & State
+  description: >-
+    Tests which FlowSOM metaclusters change in frequency (differential abundance, DA) and
+    which cluster-marker pairs change in expression (differential state, DS) between
+    conditions, with diffcyt (Weber et al., Commun Biol 2019) following the Nowicka et al.
+    CyTOF workflow (F1000Res 2017). Works on flowsom's per-sample cluster counts and
+    median expression tables plus the prep step's sample sheet and panel: edgeR, voom or
+    GLMM for DA, limma or LMM for DS, with the batch as a fixed or random effect. Each
+    condition level is compared with the reference. Writes result tables, a volcano plot,
+    per-cluster proportion plots, DS heatmaps and JSON summaries.
+  type: processor
+  tags:
+    - cytometry
+    - flow-cytometry
+    - immunology
+    - differential-abundance
+    - differential-state
+    - statistics
+    - diffcyt
+runtime:
+  # Light: tables only (clusters x samples, never per-cell data). Measured on the demo
+  # study: runs in a 768 MB container (cgroup peak, page cache included, ~0.8 GB);
+  # 2 GB leaves room for large studies (hundreds of samples, many clusters).
+  cpu: 1024
+  memory: 2048
+  # standard (ECS) by default; a workflow can run this light step as a Lambda function
+  # instead (the image serves both, see processor/entry.py).
+  computeTypes:
+    - standard
+    - lambda
+  timeoutSeconds: 900
+parameters:
+  - name: CONDITION_COLUMN
+    type: string
+    description: Column of samples.csv holding the condition to compare.
+    defaultValue: condition
+  - name: REFERENCE_LEVEL
+    type: string
+    description: >-
+      The condition level the others are compared with (logFC > 0 = higher than in the
+      reference). Empty: the first level alphabetically. For the demo study: unstimulated.
+      With more than two levels, each level is tested against this one.
+    defaultValue: ""
+  - name: BLOCK_COLUMN
+    type: string
+    description: >-
+      Column of samples.csv with the blocking factor (batch, donor, ...). A fixed effect for
+      edgeR, voom and limma, a random intercept for GLMM and LMM. Empty: no block. Dropped
+      with a warning when it is confounded with the condition.
+    defaultValue: batch
+  - name: DA_METHOD
+    type: string
+    description: >-
+      Differential abundance test: edgeR (negative binomial GLM, the diffcyt default), voom
+      (limma-voom) or GLMM (binomial GLMM with an observation-level random effect).
+    defaultValue: edgeR
+    validValues: [edgeR, voom, GLMM]
+  - name: DS_METHOD
+    type: string
+    description: >-
+      Differential state test on per-sample cluster medians: limma (moderated linear model,
+      weighted by cell counts, the diffcyt default) or LMM (linear mixed model).
+    defaultValue: limma
+    validValues: [limma, LMM]
+  - name: MIN_CELLS
+    type: integer
+    description: A cluster is tested only if it has at least MIN_CELLS cells in at least MIN_SAMPLES samples.
+    defaultValue: 3
+    min: 0
+  - name: MIN_SAMPLES
+    type: number
+    description: >-
+      See MIN_CELLS. 0 or empty: half the number of samples in the smallest condition
+      level.
+    defaultValue: 0
+    min: 0
+  - name: FDR
+    type: number
+    description: Benjamini-Hochberg adjusted p-value below which a result is called significant.
+    defaultValue: 0.05
+    min: 0
+    max: 1
+  - name: STATE_MARKERS
+    type: string
+    description: >-
+      Comma-separated markers to test for differential state (names as in panel.csv).
+      Empty: the panel's state == true markers.
+    defaultValue: ""
+# Two inputs, each in its own folder when linked; without links the files are found
+# anywhere under INPUT_DIR by name.
+inputs:
+  - name: clusters
+    description: >-
+      The flowsom step's clusters output: counts.csv (sample_id, metacluster, label, n,
+      frac), medians_by_sample.csv (sample_id, metacluster, marker, median; arcsinh scale)
+      and labels.csv. medians_by_sample.csv is needed for DS only.
+    mediaTypes:
+      - text/csv
+    placement: subfolder
+    required: true
+  - name: metadata
+    description: >-
+      The fcs-prep step's metadata output: samples.csv (sample_id, batch, condition, extra
+      columns) and panel.csv (marker, type, clustering, state).
+    mediaTypes:
+      - text/csv
+    placement: subfolder
+    required: true
+outputs:
+  - name: da
+    description: >-
+      da.csv (one row per metacluster and comparison: metacluster, label, comparison,
+      logFC, logCPM, p_val, p_adj, tested, significant, mean_frac_<level> per level),
+      volcano.png, proportions.png (per-cluster % of cells per condition, a point per
+      sample), summary.json and provenance.json.
+    mediaTypes:
+      - text/csv
+      - image/png
+      - application/json
+  - name: ds
+    description: >-
+      ds.csv (one row per metacluster, state marker and comparison: metacluster, label,
+      marker, comparison, logFC, p_val, p_adj, tested, significant, mean_median_<level>),
+      heatmap.png (significant pairs x samples), logfc.png (clusters x markers),
+      summary.json and provenance.json.
+    mediaTypes:
+      - text/csv
+      - image/png
+      - application/json
