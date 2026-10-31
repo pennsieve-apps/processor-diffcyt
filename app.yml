@@ -130,3 +130,12 @@ outputs:
       - text/csv
       - image/png
       - application/json
+
+# How a release is tested before it is made public: the inputs a review run uses.
+# See app-deploy-service docs/app-manifest-review.md.
+review:
+  version: 1
+  generate:
+    image: r
+    command: Rscript tests/make_fixture.R "$REVIEW_INPUT_DIR" linked
+    root: linked
