@@ -1,5 +1,6 @@
 cff-version: "1.2.0"
-message: If you use this app, please cite it and the works it builds on, listed under references.
+message: >-
+  If you use this app, please cite the work it implements (preferred-citation), this release, and Pennsieve (RRID:SCR_021677); the other works it builds on are listed under references.
 type: software
 title: diffcyt Differential Abundance & State
 abstract: Tests which FlowSOM metaclusters change in frequency (differential abundance) and which cluster-marker
@@ -17,6 +18,25 @@ keywords:
 - differential-state
 - statistics
 - diffcyt
+# The work this app implements; the release report's "How to cite" puts it first.
+preferred-citation:
+  type: article
+  title: 'diffcyt: Differential discovery in high-dimensional cytometry via high-resolution clustering'
+  authors:
+  - family-names: Weber
+    given-names: Lukas M.
+  - family-names: Nowicka
+    given-names: Malgorzata
+  - family-names: Soneson
+    given-names: Charlotte
+  - family-names: Robinson
+    given-names: Mark D.
+  year: 2019
+  journal: Communications Biology
+  volume: 2
+  issue: '1'
+  start: '183'
+  doi: 10.1038/s42003-019-0415-5
 references:
 - type: article
   title: 'diffcyt: Differential discovery in high-dimensional cytometry via high-resolution clustering'
