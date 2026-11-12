@@ -126,7 +126,9 @@ make run INPUT=./data/real   # or over real flowsom + prep outputs (see sample-i
 ```
 
 `make test` runs the R tests with a local `Rscript` when diffcyt is installed, otherwise inside
-the image (`docker run ... Rscript tests/test_main.R`). The R tests check that the planted DA
+the image (`docker run ... Rscript tests/test_main.R`). `tests/make_fixture.py` is the same
+synthetic study in Python for the release review's generator (the platform's generator image has
+no R). The R tests check that the planted DA
 (Treg 4x up, B cells 3x down) and DS (CD25 in CD4 memory, HLA-DR in CD8 memory) effects are
 found with every method, both input layouts, no block, three condition levels, excluded
 samples, a missing medians file and failing inputs.

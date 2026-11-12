@@ -136,6 +136,5 @@ outputs:
 review:
   version: 1
   generate:
-    image: r
-    command: Rscript tests/make_fixture.R "$REVIEW_INPUT_DIR" linked
+    command: python -m tests.make_fixture "$REVIEW_INPUT_DIR" --layout linked
     root: linked
